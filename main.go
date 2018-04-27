@@ -40,6 +40,16 @@ var (
 	re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 )
 
+func init() {
+	config := LoadConfig("./config.json")
+	if len(config.SLACK.APIKey) < 42 {
+		log.Fatal("Error - Please check your api key in config file")
+	}
+	if len(config.SLACK.Channel) < 2 {
+		log.Fatal("Error - Please check the channel name config file")
+	}
+}
+
 func LoadConfig(path string) Configuration {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {

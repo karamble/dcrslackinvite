@@ -35,19 +35,23 @@ const (
 )
 
 var (
+	client    *slackposter.Client
+	config    Configuration
 	emailForm = template.Must(template.ParseFiles("views/form.html"))
 
 	re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 )
 
 func init() {
-	config := LoadConfig("./config.json")
+	config = LoadConfig("./config.json")
 	if len(config.SLACK.APIKey) < 42 {
 		log.Fatal("Error - Please check your api key in config file")
 	}
 	if len(config.SLACK.Channel) < 2 {
 		log.Fatal("Error - Please check the channel name config file")
 	}
+
+	client = slackposter.NewClient(config.SLACK.APIKey)
 }
 
 func LoadConfig(path string) Configuration {
@@ -95,10 +99,7 @@ func view(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// load slack configuration
-	config := LoadConfig("./config.json")
 	// post the invite to slack channel
-	client := slackposter.NewClient(config.SLACK.APIKey)
 	err = client.SendMessage(context.Background(), config.SLACK.Channel, email, nil)
 	if err != nil {
 		log.Print(err)
